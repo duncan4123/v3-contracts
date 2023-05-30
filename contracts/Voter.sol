@@ -326,7 +326,7 @@ contract Voter is IVoter {
 
         if (msg.sender != governor) { // gov can create for any pool, even non-Velodrome pairs
             require(isPair, "!_pool");
-            require(isWhitelisted[tokenA] || isWhitelisted[tokenB], "!whitelisted");
+            require(isWhitelisted[tokenA] && isWhitelisted[tokenB], "!whitelisted");
         }
 
         address _external_bribe = IBribeFactory(bribefactory).createExternalBribe(allowedRewards);

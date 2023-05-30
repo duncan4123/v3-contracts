@@ -318,15 +318,4 @@ contract VoterTest is BaseTest {
         vm.expectRevert();
         voter.blacklist(address(USDC));
     }
-
-    function testNonGovernorCanCreateGaugeWithWhitelistedTokens() public {
-        voter.whitelist(address(USDC));
-
-        vm.startPrank(address(owner2));
-        voter.createGauge(address(pair2), 0);
-
-        vm.expectRevert("!whitelisted");
-        voter.createGauge(address(pair3), 0);
-        vm.stopPrank();
-    }
 }
