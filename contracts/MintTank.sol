@@ -13,7 +13,7 @@ import "contracts/interfaces/IVotingEscrow.sol";
 contract MintTank is Ownable {
     address public immutable FLOW;
     address public immutable votingEscrow;
-    address public immutable minLockTime;
+    uint256 public immutable minLockTime;
 
     constructor(
         address _flow,
@@ -23,6 +23,7 @@ contract MintTank is Ownable {
     ) {
         FLOW = _flow;
         votingEscrow = _votingEscrow;
+        minLockTime = _minLockTime;
         _transferOwnership(_team);
     }
 
