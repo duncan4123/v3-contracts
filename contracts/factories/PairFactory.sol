@@ -11,7 +11,7 @@ contract PairFactory is IPairFactory, Ownable {
     bool public isPaused;
     uint256 public stableFee;
     uint256 public volatileFee;
-    uint256 public constant MAX_FEE = 50; // 0.5%
+    uint256 public constant MAX_FEE = 500; // 5%
     address public voter;
     address public tank;
     address public deployer;

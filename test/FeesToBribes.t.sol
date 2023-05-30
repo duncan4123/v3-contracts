@@ -86,7 +86,7 @@ contract FeesToBribesTest is BaseTest {
 
     function testPairFactoryOwnerCannotSetFeeAboveMax() public {
         vm.expectRevert(abi.encodePacked("fee too high"));
-        factory.setFee(true, 51); // 6 bps = 0.06%
+        factory.setFee(true, 501);
     }
 
     function testPairFactoryOwnerCanChangeFeesAndClaim() public {
@@ -124,7 +124,7 @@ contract FeesToBribesTest is BaseTest {
 
     function testPairFactoryOwnerCannotSetFeesOverridesAboveMax() public {
         vm.expectRevert(abi.encodePacked("fee too high"));
-        factory.setFeesOverrides(address(pair), 51);
+        factory.setFeesOverrides(address(pair), 501);
     }
 
     function testPairFactoryOwnerCanSetFeesOverridesAndClaim() public {
