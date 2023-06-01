@@ -40,6 +40,9 @@ contract LPRewardsTest is BaseTest {
         tokens[3] = address(FLOW);
         voter.initialize(tokens, address(owner));
         escrow.setVoter(address(voter));
+        deployPairWithOwner(address(owner));
+        deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+        gaugeFactory.setOFlow(address(oFlow));
     }
 
     function testLPsEarnEqualVeloBasedOnVeVelo() public {

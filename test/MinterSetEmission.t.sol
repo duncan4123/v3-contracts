@@ -27,8 +27,7 @@ contract MinterSetEmission is BaseTest {
         team = new TestOwner();
         VeArtProxy artProxy = new VeArtProxy();
         escrow = new VotingEscrow(address(FLOW), address(artProxy), owners[0]);
-        factory = new PairFactory();
-        router = new Router(address(factory), address(owner));
+        deployPairFactoryAndRouter();
         gaugeFactory = new GaugeFactory();
         bribeFactory = new BribeFactory();
         voter = new Voter(
@@ -38,6 +37,9 @@ contract MinterSetEmission is BaseTest {
             address(bribeFactory)
         );
         factory.setVoter(address(voter));
+        deployPairWithOwner(address(owner));
+        deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+        gaugeFactory.setOFlow(address(oFlow));
         address[] memory tokens = new address[](2);
         tokens[0] = address(FRAX);
         tokens[1] = address(FLOW);

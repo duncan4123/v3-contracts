@@ -123,6 +123,8 @@ contract PairTest is BaseTest {
         deployVoter();
         deployPairWithOwner(address(owner));
         deployPairWithOwner(address(owner2));
+        deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+        gaugeFactory.setOFlow(address(oFlow));
 
         (address token0, address token1) = router.sortTokens(address(USDC), address(FRAX));
         assertEq(pair.token0(), token0);
@@ -823,13 +825,13 @@ contract PairTest is BaseTest {
         console2.log(gauge.rewardPerTokenStored(address(FLOW)));
         owner3.approve(address(pair), address(gauge), PAIR_1);
         owner3.deposit(address(gauge), PAIR_1, 0);
-        uint256 before = FLOW.balanceOf(address(owner3));
+        uint256 before = oFlow.balanceOf(address(owner3));
         vm.warp(block.timestamp + 1);
         // uint256 earned = gauge.earned(address(FLOW), address(owner3));
         address[] memory rewards = new address[](1);
         rewards[0] = address(FLOW);
         owner3.getGaugeReward(address(gauge), address(owner3), rewards);
-        uint256 after_ = FLOW.balanceOf(address(owner3));
+        uint256 after_ = oFlow.balanceOf(address(owner3));
         uint256 received = after_ - before;
         assertGt(received, 0);
         console2.log(gauge.rewardPerTokenStored(address(FLOW)));

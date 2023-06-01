@@ -16,6 +16,10 @@ import {RewardsDistributor} from "../contracts/RewardsDistributor.sol";
 import {Voter} from "../contracts/Voter.sol";
 import {Minter} from "../contracts/Minter.sol";
 import {MintTank} from "../contracts/MintTank.sol";
+import {OptionToken} from "../contracts/OptionToken.sol";
+import {IERC20} from "../contracts/interfaces/IERC20.sol";
+import {IPair} from "../contracts/interfaces/IPair.sol";
+import {ERC20} from "solmate/tokens/ERC20.sol";
 
 contract Deployment is Script {
     // token addresses
@@ -38,6 +42,8 @@ contract Deployment is Script {
     // TODO: set the following variables
     uint private constant INITIAL_MINT_AMOUNT = 82800140034502500000000000;
     uint private constant MINT_TANK_MIN_LOCK_TIME = 26 * 7 * 86400;
+    uint private constant INITIAL_FLOW_LIQ_AMOUNT = 1e18;
+    uint private constant INITIAL_WPLS_LIQ_AMOUNT = 1000e18;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -104,6 +110,39 @@ contract Deployment is Script {
             MINT_TANK_MIN_LOCK_TIME
         );
 
+        // Create FLOW-WPLS pair
+        // flow.approve(address(router), INITIAL_FLOW_LIQ_AMOUNT);
+        // IERC20(WPLS).approve(address(router), INITIAL_WPLS_LIQ_AMOUNT);
+        // router.addLiquidity(
+        //     address(flow),
+        //     WPLS,
+        //     false,
+        //     INITIAL_FLOW_LIQ_AMOUNT,
+        //     INITIAL_WPLS_LIQ_AMOUNT,
+        //     0,
+        //     0,
+        //     TEAM_MULTI_SIG,
+        //     block.timestamp
+        // );
+        IPair flowWplsPair = IPair(
+            pairFactory.createPair(address(flow), WPLS, false)
+        );
+
+        // Option to buy Flow
+        OptionToken oFlow = new OptionToken(
+            "Option to buy FLOW", // name
+            "oFLOW", // symbol
+            TEAM_MULTI_SIG, // admin
+            ERC20(WPLS), // payment token
+            ERC20(address(flow)), // underlying token
+            flowWplsPair, // pair
+            address(gaugeFactory), // gauge factory
+            TEAM_MULTI_SIG, // treasury
+            50 // discount
+        );
+
+        gaugeFactory.setOFlow(address(oFlow));
+
         // Set flow minter to contract
         flow.setMinter(address(minter));
 
@@ -119,6 +158,9 @@ contract Deployment is Script {
 
         // Transfer pairfactory ownership to MSIG (team)
         pairFactory.transferOwnership(TEAM_MULTI_SIG);
+
+        // Transfer gaugefactory ownership to MSIG (team)
+        gaugeFactory.transferOwnership(TEAM_MULTI_SIG);
 
         // Set voter's emergency council
         voter.setEmergencyCouncil(TEAM_MULTI_SIG);

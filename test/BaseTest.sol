@@ -9,6 +9,7 @@ import "contracts/factories/PairFactory.sol";
 import "contracts/ExternalBribe.sol";
 import "contracts/Gauge.sol";
 import "contracts/Minter.sol";
+import "contracts/OptionToken.sol";
 import "contracts/Pair.sol";
 import "contracts/RewardsDistributor.sol";
 import "contracts/Router.sol";
@@ -54,6 +55,8 @@ abstract contract BaseTest is Test, TestOwner {
     Pair pair;
     Pair pair2;
     Pair pair3;
+    Pair flowDaiPair;
+    OptionToken oFlow;
 
     function deployOwners() public {
         owner = TestOwner(address(this));
@@ -136,8 +139,11 @@ abstract contract BaseTest is Test, TestOwner {
         FRAX.approve(address(router), TOKEN_1);
         DAI.approve(address(router), TOKEN_1);
         router.addLiquidity(address(FRAX), address(DAI), true, TOKEN_1, TOKEN_1, 0, 0, address(owner), block.timestamp);
+        FLOW.approve(address(router), TOKEN_1);
+        DAI.approve(address(router), TOKEN_1);
+        router.addLiquidity(address(FLOW), address(DAI), false, TOKEN_1, TOKEN_1, 0, 0, address(owner), block.timestamp);
         vm.stopPrank();
-        assertEq(factory.allPairsLength(), 3);
+        assertEq(factory.allPairsLength(), 4);
 
         address create2address = router.pairFor(address(FRAX), address(USDC), true);
         address address1 = factory.getPair(address(FRAX), address(USDC), true);
@@ -146,6 +152,8 @@ abstract contract BaseTest is Test, TestOwner {
         pair2 = Pair(address2);
         address address3 = factory.getPair(address(FRAX), address(DAI), true);
         pair3 = Pair(address3);
+        address address4 = factory.getPair(address(FLOW), address(DAI), false);
+        flowDaiPair = Pair(address4);
         assertEq(address(pair), create2address);
         assertGt(lib.getAmountOut(USDC_1, address(USDC), address(FRAX), true), 0);
     }
@@ -154,6 +162,20 @@ abstract contract BaseTest is Test, TestOwner {
         TestOwner(_owner).transfer(address(USDC), address(pair), USDC_1);
         TestOwner(_owner).transfer(address(FRAX), address(pair), TOKEN_1);
         TestOwner(_owner).mint(address(pair), _owner);
+    }
+
+    function deployOptionTokenWithOwner(address _owner, address _gaugeFactory) public {
+        oFlow = new OptionToken(
+            "Option to buy FLOW",
+            "oFLOW",
+            _owner,
+            DAI,
+            ERC20(address(FLOW)),
+            flowDaiPair,
+            _gaugeFactory,
+            _owner,
+            30
+        );
     }
 
     receive() external payable {}

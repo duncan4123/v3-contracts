@@ -40,6 +40,8 @@ contract ExternalBribesTest is BaseTest {
         // setVoter on pairFactory. factory defined in BaseTest and we know for sure that it is deployed because of deployPairFactoryAndRouter()
         factory.setVoter(address(voter));
         deployPairWithOwner(address(owner));
+        deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+        gaugeFactory.setOFlow(address(oFlow));
 
         distributor = new RewardsDistributor(address(escrow));
         minter = new Minter(address(voter), address(escrow), address(distributor));

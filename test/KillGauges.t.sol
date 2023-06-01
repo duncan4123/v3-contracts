@@ -49,6 +49,8 @@ contract KillGaugesTest is BaseTest {
     factory.setVoter(address(voter));
 
     deployPairWithOwner(address(owner));
+    deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+    gaugeFactory.setOFlow(address(oFlow));
     distributor = new RewardsDistributor(address(escrow));
 
     minter = new Minter(address(voter), address(escrow), address(distributor));

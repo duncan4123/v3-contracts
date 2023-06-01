@@ -5,6 +5,7 @@ import 'openzeppelin-contracts/contracts/utils/math/Math.sol';
 import 'contracts/interfaces/IBribe.sol';
 import 'contracts/interfaces/IERC20.sol';
 import 'contracts/interfaces/IGauge.sol';
+import 'contracts/interfaces/IOptionToken.sol';
 import 'contracts/interfaces/IVoter.sol';
 import 'contracts/interfaces/IVotingEscrow.sol';
 
@@ -15,6 +16,9 @@ contract Gauge is IGauge {
     address public immutable _ve; // the ve token used for gauges
     address public immutable external_bribe;
     address public immutable voter;
+    address public immutable flow;
+    address public immutable gaugeFactory;
+    address public oFlow;
 
     uint public derivedSupply;
     mapping(address => uint) public derivedBalances;
@@ -81,12 +85,16 @@ contract Gauge is IGauge {
     event NotifyReward(address indexed from, address indexed reward, uint amount);
     event ClaimRewards(address indexed from, address indexed reward, uint amount);
 
-    constructor(address _stake, address _external_bribe, address  __ve, address _voter, bool _forPair, address[] memory _allowedRewardTokens) {
+    constructor(address _stake, address _external_bribe, address  __ve, address _voter, address _oFlow, address _gaugeFactory, bool _forPair, address[] memory _allowedRewardTokens) {
         stake = _stake;
         external_bribe = _external_bribe;
         _ve = __ve;
         voter = _voter;
+        oFlow = _oFlow;
+        gaugeFactory = _gaugeFactory;
         isForPair = _forPair;
+        flow = IVotingEscrow(_ve).token();
+        _safeApprove(flow, oFlow, type(uint256).max);
 
         for (uint i; i < _allowedRewardTokens.length; i++) {
             if (_allowedRewardTokens[i] != address(0)) {
@@ -264,7 +272,15 @@ contract Gauge is IGauge {
             uint _reward = earned(tokens[i], account);
             lastEarn[tokens[i]][account] = block.timestamp;
             userRewardPerTokenStored[tokens[i]][account] = rewardPerTokenStored[tokens[i]];
-            if (_reward > 0) _safeTransfer(tokens[i], account, _reward);
+            if (_reward > 0) {
+                if (tokens[i] == flow) {
+                    try IOptionToken(oFlow).mint(account, _reward){} catch {
+                        _safeTransfer(tokens[i], account, _reward);
+                    }
+                } else {
+                    _safeTransfer(tokens[i], account, _reward);
+                }
+            }
 
             emit ClaimRewards(msg.sender, tokens[i], _reward);
         }
@@ -540,6 +556,11 @@ contract Gauge is IGauge {
         isReward[oldToken] = false;
         isReward[newToken] = true;
         rewards[i] = newToken;
+    }
+
+    function setOFlow(address _oFlow) external {
+        require(msg.sender == gaugeFactory, "not gauge factory");
+        oFlow = _oFlow;
     }
 
     function _safeTransfer(address token, address to, uint256 value) internal {

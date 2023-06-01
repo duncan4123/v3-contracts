@@ -50,6 +50,8 @@ contract StakingTest is BaseTest {
         createLock3();
 
         gaugeFactory = new GaugeFactory();
+        deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+        gaugeFactory.setOFlow(address(oFlow));
         address[] memory allowedRewards = new address[](1);
         vm.prank(address(voter));
         gaugeFactory.createGauge(address(stake), address(owner), address(escrow), false, allowedRewards);
@@ -499,5 +501,32 @@ contract StakingTest is BaseTest {
 
         assertEq(after_ - before, assertEqed1);
         assertGt(assertEqed1, 0);
+    }
+
+    function testUpdateOFlowForGauge() public {
+        deployFactory();
+
+        gaugeFactory.setOFlow(address(0x01));
+        gaugeFactory.updateOFlowFor(address(gauge));
+        assertEq(gauge.oFlow(), address(0x01));
+    }
+
+    function testNonGaugeFactoryOwnerCannotUpdateOFlowForGauge() public {
+        deployFactory();
+
+        vm.startPrank(address(0x02));
+        vm.expectRevert("Ownable: caller is not the owner");
+        gaugeFactory.setOFlow(address(0x01));
+
+        vm.expectRevert("Ownable: caller is not the owner");
+        gaugeFactory.updateOFlowFor(address(gauge));
+        vm.stopPrank();
+    }
+
+    function testNonGaugeFactoryCannotUpdateOFlow() public {
+        deployFactory();
+
+        vm.expectRevert("not gauge factory");
+        gauge.setOFlow(address(0x01));
     }
 }

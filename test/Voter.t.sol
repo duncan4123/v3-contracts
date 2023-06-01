@@ -51,6 +51,9 @@ contract VoterTest is BaseTest {
 
         escrow.setVoter(address(voter));
         factory.setVoter(address(voter));
+        deployPairWithOwner(address(owner));
+        deployOptionTokenWithOwner(address(owner), address(gaugeFactory));
+        gaugeFactory.setOFlow(address(oFlow));
     }
 
     function testSetup() public {

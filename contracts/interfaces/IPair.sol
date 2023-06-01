@@ -16,4 +16,5 @@ interface IPair {
     function setExternalBribe(address _externalBribe) external;
     function hasGauge() external view returns (bool);
     function stable() external view returns (bool);
+    function prices(address tokenIn, uint amountIn, uint points) external view returns (uint[] memory);
 }
