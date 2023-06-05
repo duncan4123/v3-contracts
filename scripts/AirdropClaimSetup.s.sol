@@ -29,16 +29,6 @@ contract AirdropClaimSetup is Script {
         IFlow(FLOW).approve(address(airdropClaim), TOTAL_AIRDROP_AMOUNT);
         airdropClaim.deposit(TOTAL_AIRDROP_AMOUNT);
 
-        // TODO: fill in airdrop receivers and amounts
-        address[] memory airdropReceivers1 = new address[](100);
-        uint256[] memory amounts1 = new uint256[](100);
-        airdropClaim.setAirdropReceivers(airdropReceivers1, amounts1);
-
-        // TODO: fill in airdrop receivers and amounts
-        address[] memory airdropReceivers2 = new address[](100);
-        uint256[] memory amounts2 = new uint256[](100);
-        airdropClaim.setAirdropReceivers(airdropReceivers2, amounts2);
-
         vm.stopBroadcast();
     }
 }
