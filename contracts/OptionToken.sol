@@ -169,7 +169,7 @@ contract OptionToken is ERC20, AccessControl {
         uint256 _amount,
         uint256 _maxPaymentAmount,
         address _recipient
-    ) external virtual returns (uint256) {
+    ) external returns (uint256) {
         return _exercise(_amount, _maxPaymentAmount, _recipient);
     }
 
@@ -185,7 +185,7 @@ contract OptionToken is ERC20, AccessControl {
         uint256 _maxPaymentAmount,
         address _recipient,
         uint256 _deadline
-    ) external virtual returns (uint256) {
+    ) external returns (uint256) {
         if (block.timestamp > _deadline) revert OptionToken_PastDeadline();
         return _exercise(_amount, _maxPaymentAmount, _recipient);
     }
