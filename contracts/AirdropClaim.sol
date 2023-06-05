@@ -14,7 +14,6 @@ contract AirdropClaim is ReentrancyGuard {
 
 
     uint256 constant public PRECISION = 1000;
-    uint256 public START_CLAIM;
     uint256 public totalAirdrop;
     uint256 public totalToReceive;
     uint256 public totalWalletsIncluded;
@@ -46,12 +45,11 @@ contract AirdropClaim is ReentrancyGuard {
     event AirdropSet(uint walletAdded, uint walletTotal, uint veCHRAdded, uint veCHRTotal);
 
 
-    constructor(address _token, address _ve, address _msig, uint256 _startTimeStamp) {
+    constructor(address _token, address _ve, address _msig) {
         owner = msg.sender;
         token = IERC20(_token);
         ve = _ve;
         msig = _msig;
-        START_CLAIM = _startTimeStamp;
     }
 
 
@@ -103,7 +101,6 @@ contract AirdropClaim is ReentrancyGuard {
     function claim() external nonReentrant returns(uint _tokenId){
 
         // check user has airdrop available
-        require(block.timestamp > START_CLAIM, "Claim window hasn't started");
         require(claimableAmount[msg.sender] != 0, "No airdrop available");
 
         uint amount = claimableAmount[msg.sender];
@@ -123,7 +120,6 @@ contract AirdropClaim is ReentrancyGuard {
 
 
     function claimable(address user) public view returns(uint _claimable){
-        require(block.timestamp > START_CLAIM, "Claim window hasn't started");
         _claimable = claimableAmount[user];
     }
     

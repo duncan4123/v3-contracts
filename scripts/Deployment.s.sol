@@ -34,12 +34,14 @@ contract Deployment is Script {
 
     // privileged accounts
     // TODO: change these accounts!
-    address private constant TEAM_MULTI_SIG = address(0);
-    address private constant TANK = address(0);
-
+    address private constant TEAM_MULTI_SIG = 0xA3082Df7a11071db5ed0e02d48bca5f471dDbaF4;
+    address private constant TANK = 0x1bAe1083CF4125eD5dEeb778985C1Effac0ecC06;
+    address private constant DEPLOYER = 0x7e4fB7276353cfa80683F779c20bE9611F7536e5;
     // TODO: set the following variables
-    uint private constant INITIAL_MINT_AMOUNT = 82800140034502500000000000;
+    uint private constant INITIAL_MINT_AMOUNT = 315_000_000e18;
     uint private constant MINT_TANK_MIN_LOCK_TIME = 26 * 7 * 86400;
+    uint private constant MINT_TANK_AMOUNT = 150_000_000e18;
+    uint private constant MSIG_FLOW_AMOUNT = 165_000_000e18;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -47,7 +49,7 @@ contract Deployment is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Flow token
-        Flow flow = new Flow(TEAM_MULTI_SIG, INITIAL_MINT_AMOUNT);
+        Flow flow = new Flow(DEPLOYER, INITIAL_MINT_AMOUNT);
 
         // Gauge factory
         GaugeFactory gaugeFactory = new GaugeFactory();
@@ -106,8 +108,18 @@ contract Deployment is Script {
             MINT_TANK_MIN_LOCK_TIME
         );
 
+        flow.transfer(address(mintTank), MINT_TANK_AMOUNT);
+        flow.transfer(address(TEAM_MULTI_SIG), MSIG_FLOW_AMOUNT);
+
         IPair flowWplsPair = IPair(
             pairFactory.createPair(address(flow), WPLS, false)
+        );
+
+        // AirdropClaim
+        AirdropClaim airdropClaim = new AirdropClaim(
+            address(flow),
+            address(votingEscrow),
+            TEAM_MULTI_SIG
         );
 
         // Option to buy Flow
