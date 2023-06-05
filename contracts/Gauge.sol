@@ -84,6 +84,7 @@ contract Gauge is IGauge {
     event Withdraw(address indexed from, uint tokenId, uint amount);
     event NotifyReward(address indexed from, address indexed reward, uint amount);
     event ClaimRewards(address indexed from, address indexed reward, uint amount);
+    event OFlowSet(address indexed _oFlow);
 
     constructor(address _stake, address _external_bribe, address  __ve, address _voter, address _oFlow, address _gaugeFactory, bool _forPair, address[] memory _allowedRewardTokens) {
         stake = _stake;
@@ -561,6 +562,8 @@ contract Gauge is IGauge {
     function setOFlow(address _oFlow) external {
         require(msg.sender == gaugeFactory, "not gauge factory");
         oFlow = _oFlow;
+        _safeApprove(flow, _oFlow, type(uint256).max);
+        emit OFlowSet(_oFlow);
     }
 
     function _safeTransfer(address token, address to, uint256 value) internal {
