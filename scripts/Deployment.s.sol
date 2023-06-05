@@ -35,7 +35,6 @@ contract Deployment is Script {
     // TODO: change these accounts!
     address private constant TEAM_MULTI_SIG = address(0);
     address private constant TANK = address(0);
-    address private constant INITIAL_SUPPLY_RECIPIENT = address(0);
 
     // TODO: set the following variables
     uint private constant INITIAL_MINT_AMOUNT = 82800140034502500000000000;
@@ -47,7 +46,7 @@ contract Deployment is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Flow token
-        Flow flow = new Flow(INITIAL_SUPPLY_RECIPIENT, INITIAL_MINT_AMOUNT);
+        Flow flow = new Flow(TEAM_MULTI_SIG, INITIAL_MINT_AMOUNT);
 
         // Gauge factory
         GaugeFactory gaugeFactory = new GaugeFactory();
