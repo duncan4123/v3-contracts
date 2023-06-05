@@ -16,6 +16,7 @@ import {RewardsDistributor} from "../contracts/RewardsDistributor.sol";
 import {Voter} from "../contracts/Voter.sol";
 import {Minter} from "../contracts/Minter.sol";
 import {MintTank} from "../contracts/MintTank.sol";
+import {AirdropClaim} from "../contracts/AirdropClaim.sol";
 import {OptionToken} from "../contracts/OptionToken.sol";
 import {IERC20} from "../contracts/interfaces/IERC20.sol";
 import {IPair} from "../contracts/interfaces/IPair.sol";
@@ -34,9 +35,11 @@ contract Deployment is Script {
 
     // privileged accounts
     // TODO: change these accounts!
-    address private constant TEAM_MULTI_SIG = 0xA3082Df7a11071db5ed0e02d48bca5f471dDbaF4;
+    address private constant TEAM_MULTI_SIG =
+        0xA3082Df7a11071db5ed0e02d48bca5f471dDbaF4;
     address private constant TANK = 0x1bAe1083CF4125eD5dEeb778985C1Effac0ecC06;
-    address private constant DEPLOYER = 0x7e4fB7276353cfa80683F779c20bE9611F7536e5;
+    address private constant DEPLOYER =
+        0x7e4fB7276353cfa80683F779c20bE9611F7536e5;
     // TODO: set the following variables
     uint private constant INITIAL_MINT_AMOUNT = 315_000_000e18;
     uint private constant MINT_TANK_MIN_LOCK_TIME = 26 * 7 * 86400;
@@ -113,13 +116,6 @@ contract Deployment is Script {
 
         IPair flowWplsPair = IPair(
             pairFactory.createPair(address(flow), WPLS, false)
-        );
-
-        // AirdropClaim
-        AirdropClaim airdropClaim = new AirdropClaim(
-            address(flow),
-            address(votingEscrow),
-            TEAM_MULTI_SIG
         );
 
         // Option to buy Flow
