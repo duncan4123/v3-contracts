@@ -30,8 +30,6 @@ contract Deployment is Script {
     address private constant WETH = 0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C;
     address private constant WBTC = 0xb17D901469B9208B17d916112988A3FeD19b5cA1;
     address private constant USDT = 0x0Cb6F5a34ad42ec934882A05265A7d5F59b51A2f;
-    address private constant PLSX = 0x95B303987A60C71504D99Aa1b13B4DA07b0790ab;
-    address private constant PINU = 0x655cdd69442912076A05975C26eA59BAd179244d;
 
     // privileged accounts
     // TODO: change these accounts!
@@ -172,7 +170,7 @@ contract Deployment is Script {
         rewardsDistributor.setDepositor(address(minter));
 
         // Initialize tokens for voter
-        address[] memory whitelistedTokens = new address[](8);
+        address[] memory whitelistedTokens = new address[](7);
         whitelistedTokens[0] = address(flow);
         whitelistedTokens[1] = WPLS;
         whitelistedTokens[2] = USDC;
@@ -180,8 +178,6 @@ contract Deployment is Script {
         whitelistedTokens[4] = WETH;
         whitelistedTokens[5] = WBTC;
         whitelistedTokens[6] = USDT;
-        whitelistedTokens[7] = PLSX;
-        whitelistedTokens[8] = PINU;
         voter.initialize(whitelistedTokens, address(minter));
 
         vm.stopBroadcast();
