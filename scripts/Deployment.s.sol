@@ -40,8 +40,6 @@ contract Deployment is Script {
     // TODO: set the following variables
     uint private constant INITIAL_MINT_AMOUNT = 82800140034502500000000000;
     uint private constant MINT_TANK_MIN_LOCK_TIME = 26 * 7 * 86400;
-    uint private constant INITIAL_FLOW_LIQ_AMOUNT = 1e18;
-    uint private constant INITIAL_WPLS_LIQ_AMOUNT = 1000e18;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
@@ -108,20 +106,6 @@ contract Deployment is Script {
             MINT_TANK_MIN_LOCK_TIME
         );
 
-        // Create FLOW-WPLS pair
-        // flow.approve(address(router), INITIAL_FLOW_LIQ_AMOUNT);
-        // IERC20(WPLS).approve(address(router), INITIAL_WPLS_LIQ_AMOUNT);
-        // router.addLiquidity(
-        //     address(flow),
-        //     WPLS,
-        //     false,
-        //     INITIAL_FLOW_LIQ_AMOUNT,
-        //     INITIAL_WPLS_LIQ_AMOUNT,
-        //     0,
-        //     0,
-        //     TEAM_MULTI_SIG,
-        //     block.timestamp
-        // );
         IPair flowWplsPair = IPair(
             pairFactory.createPair(address(flow), WPLS, false)
         );
