@@ -16,7 +16,7 @@ import {IPair} from "./interfaces/IPair.sol";
 /// @dev Assumes the underlying token and the payment token both use 18 decimals and revert on
 // failure to transfer.
 
-contract OptionToken is ERC20, AccessControl {
+contract OptionToken2 is ERC20, AccessControl {
     /// -----------------------------------------------------------------------
     /// Constants
     /// -----------------------------------------------------------------------
@@ -230,6 +230,12 @@ contract OptionToken is ERC20, AccessControl {
     function getDiscountedPrice(uint256 _amount) public view returns (uint256) {
         return (getTimeWeightedAveragePrice(_amount) * discount) / 100;
     }
+    /// @notice Returns the discounted price in paymentTokens for a given amount of options tokens redeemed to veFLOW
+    /// @param _amount The amount of options tokens to exercise
+    /// @return The amount of payment tokens to pay to purchase the underlying tokens
+    function getVeDiscountedPrice(uint256 _amount) public view returns (uint256) {
+        return (getTimeWeightedAveragePrice(_amount) * veDiscount) / 100;
+    }
 
     /// @notice Returns the average price in payment tokens over 2 hours for a given amount of underlying tokens
     /// @param _amount The amount of underlying tokens to purchase
@@ -375,7 +381,7 @@ contract OptionToken is ERC20, AccessControl {
 
         // burn callers tokens
         _burn(msg.sender, _amount);
-        paymentAmount = getDiscountedPrice(_amount) * veDiscount / 100 ;
+        paymentAmount = getVeDiscountedPrice(_amount);
         if (paymentAmount > _maxPaymentAmount)
             revert OptionToken_SlippageTooHigh();
 
