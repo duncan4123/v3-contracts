@@ -5,8 +5,8 @@ import {AccessControl} from "openzeppelin-contracts/contracts/access/AccessContr
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
 
-import {IFLOW} from "./interfaces/IFlow.sol";
-
+import {IFlow} from "./interfaces/IFlow.sol";
+import {IVotingEscrow} from "./interfaces/IVotingEscrow.sol";
 import {IPair} from "./interfaces/IPair.sol";
 
 /// @title Option Token
@@ -287,8 +287,8 @@ contract OptionToken is ERC20, AccessControl {
         discount = _discount;
         emit SetDiscount(_discount);
     }
-    /// @notice Sets the discount amount. Only callable by the admin.
-    /// @param _discount The new discount amount.
+    /// @notice Sets the further discount amount for locking. Only callable by the admin.
+    /// @param _veDiscount The new discount amount.
     function setVeDiscount(uint256 _veDiscount) external onlyAdmin {
         if (_veDiscount > MAX_DISCOUNT || _veDiscount == MIN_DISCOUNT)
             revert OptionToken_InvalidDiscount();
@@ -383,8 +383,8 @@ contract OptionToken is ERC20, AccessControl {
         paymentToken.transferFrom(msg.sender, treasury, paymentAmount); // sCANTO reverts on failure
 
         // lock underlying tokens to veFLOW
-        IFlow(underlyingToken).approve(votingEscrow, _amount);
-        IVotingEscrow.createLockFor(_amount, FULL_LOCK,  _recipient); 
+        underlyingToken.approve(votingEscrow, _amount);
+        IVotingEscrow(votingEscrow).create_lock_for(_amount, FULL_LOCK,  _recipient); 
 
         emit Exercise(msg.sender, _recipient, _amount, paymentAmount);
     }
