@@ -10,6 +10,7 @@ import "contracts/ExternalBribe.sol";
 import "contracts/Gauge.sol";
 import "contracts/Minter.sol";
 import "contracts/OptionToken.sol";
+import "contracts/OptionTokenV2.sol";
 import "contracts/Pair.sol";
 import "contracts/RewardsDistributor.sol";
 import "contracts/Router.sol";
@@ -57,6 +58,7 @@ abstract contract BaseTest is Test, TestOwner {
     Pair pair3;
     Pair flowDaiPair;
     OptionToken oFlow;
+    OptionTokenV2 oFlowV2;
 
     function deployOwners() public {
         owner = TestOwner(address(this));
@@ -175,6 +177,22 @@ abstract contract BaseTest is Test, TestOwner {
             _gaugeFactory,
             _owner,
             30
+        );
+    }
+
+    function deployOptionTokenV2WithOwner(address _owner, address _gaugeFactory, address _escrow) public {
+        oFlowV2 = new OptionTokenV2(
+            "Option to buy FLOW",
+            "oFLOW",
+            _owner,
+            DAI,
+            ERC20(address(FLOW)),
+            flowDaiPair,
+            _gaugeFactory,
+            _owner,
+            30,
+            60,
+            _escrow
         );
     }
 

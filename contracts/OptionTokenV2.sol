@@ -16,7 +16,7 @@ import {IPair} from "./interfaces/IPair.sol";
 /// @dev Assumes the underlying token and the payment token both use 18 decimals and revert on
 // failure to transfer.
 
-contract OptionToken2 is ERC20, AccessControl {
+contract OptionTokenV2 is ERC20, AccessControl {
     /// -----------------------------------------------------------------------
     /// Constants
     /// -----------------------------------------------------------------------
@@ -61,6 +61,13 @@ contract OptionToken2 is ERC20, AccessControl {
         uint256 amount,
         uint256 paymentAmount
     );
+    event ExerciseVe(
+        address indexed sender,
+        address indexed recipient,
+        uint256 amount,
+        uint256 paymentAmount,
+        uint256 nftId
+    );
     event SetPairAndPaymentToken(
         IPair indexed newPair,
         address indexed newPaymentToken
@@ -83,7 +90,6 @@ contract OptionToken2 is ERC20, AccessControl {
 
     /// @notice The voting escrow for locking FLOW to veFLOR
     address public votingEscrow;
-
 
     /// -----------------------------------------------------------------------
     /// Storage variables
@@ -148,6 +154,7 @@ contract OptionToken2 is ERC20, AccessControl {
         address _gaugeFactory,
         address _treasury,
         uint256 _discount,
+        uint256 _veDiscount,
         address _votingEscrow
     ) ERC20(_name, _symbol, 18) {
         _grantRole(ADMIN_ROLE, _admin);
@@ -161,11 +168,13 @@ contract OptionToken2 is ERC20, AccessControl {
         pair = _pair;
         treasury = _treasury;
         discount = _discount;
+        veDiscount = _veDiscount;
         votingEscrow = _votingEscrow;
 
         emit SetPairAndPaymentToken(_pair, address(paymentToken));
         emit SetTreasury(_treasury);
         emit SetDiscount(_discount);
+        emit SetVeDiscount(_veDiscount);
     }
 
     /// -----------------------------------------------------------------------
@@ -202,7 +211,7 @@ contract OptionToken2 is ERC20, AccessControl {
         if (block.timestamp > _deadline) revert OptionToken_PastDeadline();
         return _exercise(_amount, _maxPaymentAmount, _recipient);
     }
-    
+
     /// @notice Exercises options tokens to purchase the underlying tokens.
     /// @dev The oracle may revert if it cannot give a secure result.
     /// @param _amount The amount of options tokens to exercise
@@ -215,7 +224,7 @@ contract OptionToken2 is ERC20, AccessControl {
         uint256 _maxPaymentAmount,
         address _recipient,
         uint256 _deadline
-    ) external returns (uint256) {
+    ) external returns (uint256, uint256) {
         if (block.timestamp > _deadline) revert OptionToken_PastDeadline();
         return _exerciseVe(_amount, _maxPaymentAmount, _recipient);
     }
@@ -230,10 +239,13 @@ contract OptionToken2 is ERC20, AccessControl {
     function getDiscountedPrice(uint256 _amount) public view returns (uint256) {
         return (getTimeWeightedAveragePrice(_amount) * discount) / 100;
     }
+
     /// @notice Returns the discounted price in paymentTokens for a given amount of options tokens redeemed to veFLOW
     /// @param _amount The amount of options tokens to exercise
     /// @return The amount of payment tokens to pay to purchase the underlying tokens
-    function getVeDiscountedPrice(uint256 _amount) public view returns (uint256) {
+    function getVeDiscountedPrice(
+        uint256 _amount
+    ) public view returns (uint256) {
         return (getTimeWeightedAveragePrice(_amount) * veDiscount) / 100;
     }
 
@@ -293,6 +305,7 @@ contract OptionToken2 is ERC20, AccessControl {
         discount = _discount;
         emit SetDiscount(_discount);
     }
+
     /// @notice Sets the further discount amount for locking. Only callable by the admin.
     /// @param _veDiscount The new discount amount.
     function setVeDiscount(uint256 _veDiscount) external onlyAdmin {
@@ -376,7 +389,7 @@ contract OptionToken2 is ERC20, AccessControl {
         uint256 _amount,
         uint256 _maxPaymentAmount,
         address _recipient
-    ) internal returns (uint256 paymentAmount) {
+    ) internal returns (uint256 paymentAmount, uint256 nftId) {
         if (isPaused) revert OptionToken_Paused();
 
         // burn callers tokens
@@ -390,8 +403,12 @@ contract OptionToken2 is ERC20, AccessControl {
 
         // lock underlying tokens to veFLOW
         underlyingToken.approve(votingEscrow, _amount);
-        IVotingEscrow(votingEscrow).create_lock_for(_amount, FULL_LOCK,  _recipient); 
+        nftId = IVotingEscrow(votingEscrow).create_lock_for(
+            _amount,
+            FULL_LOCK,
+            _recipient
+        );
 
-        emit Exercise(msg.sender, _recipient, _amount, paymentAmount);
+        emit ExerciseVe(msg.sender, _recipient, _amount, paymentAmount, nftId);
     }
 }
