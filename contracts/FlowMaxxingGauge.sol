@@ -9,6 +9,7 @@ import 'contracts/interfaces/IOptionToken.sol';
 import 'contracts/interfaces/IVoter.sol';
 import 'contracts/interfaces/IVotingEscrow.sol';
 
+// add withdraw to cooldown remove normal withdraw
 
 // Gauges are used to incentivize pools, they emit reward tokens over 7 days for staked LP tokens
 contract Gauge is IGauge {
